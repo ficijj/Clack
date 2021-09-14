@@ -16,15 +16,15 @@ public abstract class ClackData {
         date = new Date();
     }
 
-    public ClackData(int type){
-    this("Anon",type);
+    public ClackData(int type) {
+        this("Anon", type);
     }
 
-    public ClackData(){
-        this("Anon",0);
+    public ClackData() {
+        this("Anon", 0);
     }
 
-//methods
+    //methods
     public int getType() {
         return type;
     }
