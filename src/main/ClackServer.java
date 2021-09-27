@@ -2,7 +2,7 @@ package main;
 
 import data.ClackData;
 
-public class ClackServer{
+public class ClackServer {
 
     /**
      * Declaration of all variables for class
@@ -22,42 +22,54 @@ public class ClackServer{
 
 
     /**
-     *
-     *Constructors
+     * Constructors
      *
      * @param port - port connection number constructor
      */
-    public ClackServer(int port) { this.port= port;
-    dataToReceiveFromClient = null;
-    dataToSendToClient = null;}
+    public ClackServer(int port) {
+        this.port = port;
+        dataToReceiveFromClient = null;
+        dataToSendToClient = null;
+    }
 
     /**
      * default constructor for port and data sent and received between client and server
      */
-    ClackServer() { this(7000);}
+    public ClackServer() {
+        this(7000);
+    }
 
     //methods
 
-    public int getPort(){ return port;}
+    public int getPort() {
+        return port;
+    }
 
-    public void start() {}
+    public void start() {
+    }
 
-    public void receiveData(){}
+    public void receiveData() {
+    }
 
-    public void sendData(){}
+    public void sendData() {
+    }
 
     @Override
-    public int hashCode(){ return 0;}
+    public int hashCode() {
+        return 0;
+    }
 
 
-    public boolean equals( ClackServer comp) { if (comp == null) return false;
-        if ( !(comp instanceof ClackServer) ) return false;
-        return this.equals(comp);}
+    public boolean equals(ClackServer comp) {
+        if (comp == null) return false;
+        if (!(comp instanceof ClackServer)) return false;
+        return this.toString().equals(comp.toString());
+    }
 
     @Override
     public String toString() {
         return "ClackClient{" +
-                ", port=" + port +
+                "port=" + port +
                 ", closeConnection=" + closeConnection +
                 ", dataToSendToClient=" + dataToSendToClient +
                 ", dataToReceiveFromClient=" + dataToReceiveFromClient +

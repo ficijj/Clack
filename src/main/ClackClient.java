@@ -58,7 +58,9 @@ public class ClackClient {
         return username;
     }
 
-    public String getHostName() {return hostName;  }
+    public String getHostName() {
+        return hostName;
+    }
 
     public int getPort() {
         return port;
@@ -69,9 +71,10 @@ public class ClackClient {
         return 0;
     }
 
-    public boolean equals( ClackClient comp) { if (comp == null) return false;
-        if ( !(comp instanceof ClackClient) ) return false;
-        return this.equals(comp);
+    public boolean equals(ClackClient comp) {
+        if (comp == null) return false;
+        if (!(comp instanceof ClackClient)) return false;
+        return this.toString().equals(comp.toString());
     }
 
     @Override

@@ -1,10 +1,34 @@
 package test;
 
-import data.ClackData;
-import data.MessageClackData;
-import data.FileClackData;
+import data.*;
 
 public class TestClackData {
-  ClackData testData = new MessageClackData("Test Username","message test", 44);
-  ClackData testDataFile = new FileClackData( "Test Username","file nameTest", 44);
+  public static void main(String [] args) {
+    ClackData testData1 = new MessageClackData("Test Username", "message test", 2);
+    System.out.println(testData1);
+
+    ClackData testData2 = new MessageClackData();
+    System.out.println(testData2);
+
+    System.out.println(testData2.getData());
+
+    System.out.println(testData1 + " is the same as " + testData1 + ": " + testData1.equals(testData1));
+    System.out.println(testData1 + " is the same as " + testData2 + ": " + testData1.equals(testData2));
+
+    System.out.println();
+
+    ClackData testDataFile1 = new FileClackData("Test Username", "Test File Name", 3);
+    System.out.println(testDataFile1);
+
+    ClackData testDataFile2 = new FileClackData();
+    System.out.println(testDataFile2);
+
+    ((FileClackData) testDataFile2).setFileName("new file name");
+    System.out.println(((FileClackData) testDataFile2).getFileName());
+
+    System.out.println(testDataFile2.getData());
+
+    System.out.println(testDataFile1 + " is the same as " + testDataFile1 + ": " + testDataFile1.equals(testDataFile1));
+    System.out.println(testDataFile1 + " is the same as " + testDataFile2 + ": " + testDataFile1.equals(testDataFile2));
+  }
 }

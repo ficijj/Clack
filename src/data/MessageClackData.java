@@ -43,12 +43,18 @@ public class MessageClackData extends ClackData {
      * @return True if they are exactly the same and false otherwise
      */
     public boolean equals(MessageClackData comp) {
-        return this.message.equals(comp.message) && this.getUsername().equals(comp.getUsername());
+        if(comp == null) return false;
+        if(!(comp instanceof MessageClackData)) return false;
+        return this.toString().equals(comp.toString());
     }
 
     @Override
     public String toString() {
-        return "user: " + getUsername() + ", date: " + getDate() + ", type: " + getType() + ", message: " + this.getData();
+        return "MessageClackData{" +
+                "username=" + this.getUsername() +
+                ", message=" + this.getData() +
+                ", type=" + this.getType() +
+                '}';
     }
 
 }

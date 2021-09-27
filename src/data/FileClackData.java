@@ -73,11 +73,18 @@ public class FileClackData extends ClackData {
      * @return True if the file name and contents are exactly the same and false otherwise
      */
     public boolean equals(FileClackData comp) {
-        return this.fileName.equals(comp.fileName) && this.fileContents.equals(comp.fileContents);
+        if(comp == null) return false;
+        if(!(comp instanceof FileClackData)) return false;
+        return this.toString().equals(comp.toString());
     }
 
     @Override
     public String toString() {
-        return "user : " + getUsername() + ", date: " + getDate() + ", type: " + getType() + ", file name: " + fileName + ", file contents: " + fileContents;
+        return "FileClackData{" +
+                "username=" + this.getUsername() +
+                ", fileName=" + this.fileName +
+                ", fileContents=" + this.getData() +
+                ", type=" + this.getType() +
+                '}';
     }
 }
