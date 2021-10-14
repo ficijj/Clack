@@ -77,4 +77,57 @@ public abstract class ClackData {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         return dateFormat.format(date);
     }
+
+    protected String encrypt(String inputStringToEncrypt, String key) {
+        String output = "";
+        // single case dictionary
+        String alphabet = "abcdefghijklmnopqrstuvwxyz";
+        String low = inputStringToEncrypt.toLowerCase(); // to work on
+
+        for (int i = 0, posInKey = 0; i < inputStringToEncrypt.length(); i++) {
+            int locOfKeyInAlpha = alphabet.indexOf(key.charAt(posInKey % key.length()));
+            int locOfInputInAlpha = alphabet.indexOf(low.charAt(i));
+            String out = ""; // the character we'll add
+            if (!(low.charAt(i) >= 'a' && low.charAt(i) <= 'z')) {
+                out += low.charAt(i); // keep special chars untouched
+            } else if (locOfInputInAlpha > -1) { // only if valid
+                out = String.valueOf((alphabet.charAt((locOfKeyInAlpha + locOfInputInAlpha) % alphabet.length()))); // get the ciphered value
+                posInKey++;
+            }
+            if (low.charAt(i) != inputStringToEncrypt.charAt(i)) { // if input and lower case are different
+                out = out.toUpperCase();
+            }
+            output += out;
+        }
+        return output;
+    }
+
+    protected String decrypt(String inputStringToDecrypt, String key) {
+        String output = "";
+        // single case dictionary
+        String alphabet = "abcdefghijklmnopqrstuvwxyz";
+        String low = inputStringToDecrypt.toLowerCase(); // to work on
+
+        for (int i = 0, posInKey = 0; i < inputStringToDecrypt.length(); i++) {
+            int locOfKeyInAlpha = alphabet.indexOf(key.charAt(posInKey % key.length()));
+            int locOfInputInAlpha = alphabet.indexOf(low.charAt(i));
+            String out = ""; // the character we'll add
+            if (!(low.charAt(i) >= 'a' && low.charAt(i) <= 'z')) {
+                out += low.charAt(i); // keep spaces untouched
+            } else if (locOfInputInAlpha > -1) { // only if valid
+                int newValPos = (locOfInputInAlpha - locOfKeyInAlpha + alphabet.length() ) % alphabet.length();
+                if(newValPos < 0){
+                    newValPos += 26;
+                }
+                out = String.valueOf((alphabet.charAt(newValPos))); // get the ciphered value
+                posInKey++;
+            }
+            if (low.charAt(i) != inputStringToDecrypt.charAt(i)) { // if input and lower case are different
+                out = out.toUpperCase();
+            }
+            output += out;
+        }
+        return output;
+    }
+
 }
