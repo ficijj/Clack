@@ -1,5 +1,10 @@
 package data;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
 public class FileClackData extends ClackData {
     private String fileName;
     private String fileContents;
@@ -17,9 +22,9 @@ public class FileClackData extends ClackData {
         fileContents = null;
     }
 
-    /**
-     * Constructor that sets all variables to default values
-     */
+
+     // Constructor that sets all variables to default values
+
     public FileClackData() {
         this("Anon", "", 0);
     }
@@ -47,18 +52,85 @@ public class FileClackData extends ClackData {
         return fileContents;
     }
 
+    public String getData(String key) {return decrypt(fileContents, key);}
+
     /**
      * Read the contents of the file
      */
     public void readFileContents() {
+        try {
+            fileContents = "";
+            FileReader reader = new FileReader(fileName);
+            boolean doneReadingFile = false;
 
+            while (!doneReadingFile) {
+                int nextCharacterAsInteger = reader.read();
+                doneReadingFile = nextCharacterAsInteger == -1;
+
+                if (!doneReadingFile) {
+                    char nextCharacter = (char)nextCharacterAsInteger;
+                    fileContents += nextCharacter;
+                }
+            }
+            reader.close();
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("File cannot be found, no file read.");
+        } catch (IOException ioe) {
+            System.err.println("Error reading or closing file.");
+        }
+    }
+
+    public void readFileContents(String key) {
+        try {
+            fileContents = "";
+            FileReader reader = new FileReader(fileName);
+            boolean doneReadingFile = false;
+
+            while (!doneReadingFile) {
+                int nextCharacterAsInteger = reader.read();
+                doneReadingFile = nextCharacterAsInteger == -1;
+
+                if (!doneReadingFile) {
+                    char nextCharacter = (char)nextCharacterAsInteger;
+                    fileContents += nextCharacter;
+                }
+            }
+            fileContents = encrypt(fileContents, key);
+            reader.close();
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("This file cannot be found, no file read.");
+        } catch (IOException ioe) {
+            System.err.println("Error reading or closing file.");
+        }
     }
 
     /**
      * Write to the contents of the file
      */
-    public void writeFileContents() {
+    public void writeFileContents(String key) {
+        try {
+            FileWriter writer = new FileWriter(fileName);
 
+            writer.write(decrypt(fileContents, key));
+            writer.close();
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("This file cannot be found, no file read.");
+        } catch (IOException ioe) {
+            System.err.println("Error writing or closing file.");
+        }
+    }
+
+    public void writeFileContents() {
+        try {
+            FileWriter writer = new FileWriter(fileName);
+
+            writer.write(fileContents);
+            writer.close();
+        } catch (FileNotFoundException fnfe) {
+            System.err.println("This file cannot be found, no file read.");
+        } catch (IOException ioe) {
+            System.err.println("Error writing or closing file.");
+        }
     }
 
     @Override

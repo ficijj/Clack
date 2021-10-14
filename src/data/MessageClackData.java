@@ -26,10 +26,29 @@ public class MessageClackData extends ClackData {
         this("Anon", " ", 0);
     }
 
+    /**
+     *
+     * @param userName username of the user
+     * @param message message to be encrypted or decrypted
+     * @param key used to decrypt and encrypt messages
+     * @param type port
+     */
+
+
+    public MessageClackData(String userName, String message, String key, int type){
+
+        this(userName, message, type);
+        encrypt(message, key);
+
+    }
+
+
     @Override
     public String getData() {
         return message;
     }
+
+    public String getData(String key) {return decrypt(message, key);} /**  ||3|| **/
 
     @Override
     public int hashCode() {

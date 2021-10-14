@@ -68,6 +68,8 @@ public abstract class ClackData {
      */
     public abstract String getData();
 
+    public abstract String getData(String key);
+
     /**
      * Gives the date the class was instantiated
      *
