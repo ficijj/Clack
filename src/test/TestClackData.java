@@ -39,10 +39,9 @@ public class TestClackData {
 //  String decrypted = testData1.decrypt(encrypted, key);
 //  System.out.println(encrypted);
 //  System.out.println(decrypted);
-    ClackData testing = new MessageClackData("username", "hello test", 2);
+    ClackData testing = new MessageClackData("username", "hello test",key, 2);
     String decrypted = testing.getData(key);
     System.out.println(decrypted);
-    System.out.println("prints the right number of letters and spaces but the " +
-            "encryption is messed up");
+
   }
 }

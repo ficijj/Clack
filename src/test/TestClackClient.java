@@ -1,5 +1,7 @@
 package test;
 
+import data.ClackData;
+import data.MessageClackData;
 import main.ClackClient;
 
 public class TestClackClient {
@@ -25,6 +27,11 @@ public class TestClackClient {
 
         System.out.println(testClient1 + " is the same as " + testClient1 + ": " + testClient1.equals(testClient1));
         System.out.println(testClient1 + " is the same as " + testClient2 + ": " + testClient1.equals(testClient2));
+
+        String key = "test";
+        ClackClient testing = new ClackClient("username", "hello test", 1);
+        ClackClient testing2 = new ClackClient("username", "hello test", 2);
+        ClackClient testing3 = new ClackClient("username", "hello test", 3);
 
 
     }
