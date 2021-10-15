@@ -55,6 +55,9 @@ public class MessageClackData extends ClackData {
         return result;
     }
 
+
+
+
     /**
      * Tells you if the username and message contents of the 2 classes is the same
      *

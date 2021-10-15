@@ -25,5 +25,7 @@ public class TestClackClient {
 
         System.out.println(testClient1 + " is the same as " + testClient1 + ": " + testClient1.equals(testClient1));
         System.out.println(testClient1 + " is the same as " + testClient2 + ": " + testClient1.equals(testClient2));
+
+
     }
 }

@@ -25,9 +25,7 @@ public class FileClackData extends ClackData {
     /**
      * Default constructor which sets all values to their respective defaults
      */
-    public FileClackData() {
-        this("Anon", "", 0);
-    }
+    public FileClackData() { this("Anon", "", 0); }
 
     /**
      * Mutator for the file name
