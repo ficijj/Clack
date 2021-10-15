@@ -7,6 +7,11 @@ import java.text.SimpleDateFormat;
 public abstract class ClackData {
 
     //declaration of variables
+    public static final int CONST_LIST_USERS = 0;
+    public static final int CONST_LOG_OUT = 1;
+    public static final int CONST_SEND_MESSAGE = 2;
+    public static final int CONST_SEND_FILE = 3;
+
     private String username;
     private int type;
     private Date date;
@@ -68,6 +73,12 @@ public abstract class ClackData {
      */
     public abstract String getData();
 
+    /**
+     * Gives the data contained in the class as a String after decrypting it
+     *
+     * @param key The decryption key
+     * @return The decrypted data
+     */
     public abstract String getData(String key);
 
     /**
@@ -80,6 +91,13 @@ public abstract class ClackData {
         return dateFormat.format(date);
     }
 
+    /**
+     * Data encryption algorithm that uses a vigenere cipher, ignoring all special characters
+     *
+     * @param inputStringToEncrypt The String you want to encrypt
+     * @param key                  The key to use for encryption
+     * @return The fully encrypted data
+     */
     protected String encrypt(String inputStringToEncrypt, String key) {
         String output = "";
         // single case dictionary
@@ -104,6 +122,13 @@ public abstract class ClackData {
         return output;
     }
 
+    /**
+     * Data decryption algorithm that uses a vigenere cipher, ignoring all special characters
+     *
+     * @param inputStringToDecrypt The String you want to decrypt
+     * @param key                  The key to use for decryption
+     * @return The decrypted String
+     */
     protected String decrypt(String inputStringToDecrypt, String key) {
         String output = "";
         // single case dictionary
@@ -117,8 +142,8 @@ public abstract class ClackData {
             if (!(low.charAt(i) >= 'a' && low.charAt(i) <= 'z')) {
                 out += low.charAt(i); // keep spaces untouched
             } else if (locOfInputInAlpha > -1) { // only if valid
-                int newValPos = (locOfInputInAlpha - locOfKeyInAlpha + alphabet.length() ) % alphabet.length();
-                if(newValPos < 0){
+                int newValPos = (locOfInputInAlpha - locOfKeyInAlpha + alphabet.length()) % alphabet.length();
+                if (newValPos < 0) {
                     newValPos += 26;
                 }
                 out = String.valueOf((alphabet.charAt(newValPos))); // get the ciphered value

@@ -27,19 +27,14 @@ public class MessageClackData extends ClackData {
     }
 
     /**
-     *
      * @param userName username of the user
-     * @param message message to be encrypted or decrypted
-     * @param key used to decrypt and encrypt messages
-     * @param type port
+     * @param message  message to be encrypted or decrypted
+     * @param key      used to decrypt and encrypt messages
+     * @param type     port
      */
-
-
-    public MessageClackData(String userName, String message, String key, int type){
-
+    public MessageClackData(String userName, String message, String key, int type) {
         this(userName, message, type);
-        encrypt(message, key);
-
+        message = encrypt(message, key);
     }
 
 
@@ -48,11 +43,16 @@ public class MessageClackData extends ClackData {
         return message;
     }
 
-    public String getData(String key) {return decrypt(message, key);} /**  ||3|| **/
+    @Override
+    public String getData(String key) {
+        return decrypt(message, key);
+    }
 
     @Override
     public int hashCode() {
-        return 0;
+        int result = 17;
+        result = 37 * result + message.hashCode();
+        return result;
     }
 
     /**
@@ -62,9 +62,9 @@ public class MessageClackData extends ClackData {
      * @return True if they are exactly the same and false otherwise
      */
     public boolean equals(MessageClackData comp) {
-        if(comp == null) return false;
-        if(!(comp instanceof MessageClackData)) return false;
-        return this.toString().equals(comp.toString());
+        if (comp == null) return false;
+        if (!(comp instanceof MessageClackData)) return false;
+        return this.message.equals(comp.message);
     }
 
     @Override
@@ -73,6 +73,7 @@ public class MessageClackData extends ClackData {
                 "username=" + this.getUsername() +
                 ", message=" + this.getData() +
                 ", type=" + this.getType() +
+                ", date= " + this.getDate() +
                 '}';
     }
 

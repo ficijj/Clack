@@ -22,9 +22,9 @@ public class FileClackData extends ClackData {
         fileContents = null;
     }
 
-
-     // Constructor that sets all variables to default values
-
+    /**
+     * Default constructor which sets all values to their respective defaults
+     */
     public FileClackData() {
         this("Anon", "", 0);
     }
@@ -52,12 +52,17 @@ public class FileClackData extends ClackData {
         return fileContents;
     }
 
-    public String getData(String key) {return decrypt(fileContents, key);}
+    @Override
+    public String getData(String key) {
+        return decrypt(fileContents, key);
+    }
 
     /**
-     * Read the contents of the file
+     * Reads from specified file (fileName) into fileContents
+     *
+     * @throws IOException If the file cannot be found or there is an error reading/closing the file
      */
-    public void readFileContents() {
+    public void readFileContents() throws IOException {
         try {
             fileContents = "";
             FileReader reader = new FileReader(fileName);
@@ -68,7 +73,7 @@ public class FileClackData extends ClackData {
                 doneReadingFile = nextCharacterAsInteger == -1;
 
                 if (!doneReadingFile) {
-                    char nextCharacter = (char)nextCharacterAsInteger;
+                    char nextCharacter = (char) nextCharacterAsInteger;
                     fileContents += nextCharacter;
                 }
             }
@@ -80,7 +85,13 @@ public class FileClackData extends ClackData {
         }
     }
 
-    public void readFileContents(String key) {
+    /**
+     * Reads from specified file (fileName) into fileContents while encrypting
+     *
+     * @param key To use in the encryption process
+     * @throws IOException If the file cannot be found or there is an error reading/closing the file
+     */
+    public void readFileContents(String key) throws IOException {
         try {
             fileContents = "";
             FileReader reader = new FileReader(fileName);
@@ -91,7 +102,7 @@ public class FileClackData extends ClackData {
                 doneReadingFile = nextCharacterAsInteger == -1;
 
                 if (!doneReadingFile) {
-                    char nextCharacter = (char)nextCharacterAsInteger;
+                    char nextCharacter = (char) nextCharacterAsInteger;
                     fileContents += nextCharacter;
                 }
             }
@@ -105,7 +116,9 @@ public class FileClackData extends ClackData {
     }
 
     /**
-     * Write to the contents of the file
+     * Writes from fileContents to specified file (fileName) while decrypting
+     *
+     * @param key To use in the decryption process
      */
     public void writeFileContents(String key) {
         try {
@@ -120,6 +133,9 @@ public class FileClackData extends ClackData {
         }
     }
 
+    /**
+     * Writes from fileContents to specified file (fileName)
+     */
     public void writeFileContents() {
         try {
             FileWriter writer = new FileWriter(fileName);
@@ -135,7 +151,10 @@ public class FileClackData extends ClackData {
 
     @Override
     public int hashCode() {
-        return 0;
+        int result = 17;
+        result = 37 * result + fileName.hashCode();
+        result = 37 * result + fileContents.hashCode();
+        return result;
     }
 
     /**
@@ -145,9 +164,9 @@ public class FileClackData extends ClackData {
      * @return True if the file name and contents are exactly the same and false otherwise
      */
     public boolean equals(FileClackData comp) {
-        if(comp == null) return false;
-        if(!(comp instanceof FileClackData)) return false;
-        return this.toString().equals(comp.toString());
+        if (comp == null) return false;
+        if (!(comp instanceof FileClackData)) return false;
+        return this.fileName.equals(comp.fileName) && this.fileContents.equals(comp.fileContents);
     }
 
     @Override
@@ -157,6 +176,7 @@ public class FileClackData extends ClackData {
                 ", fileName=" + this.fileName +
                 ", fileContents=" + this.getData() +
                 ", type=" + this.getType() +
+                ", date= " + this.getDate() +
                 '}';
     }
 }
