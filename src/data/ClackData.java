@@ -1,10 +1,11 @@
 package data;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-public abstract class ClackData {
+public abstract class ClackData implements Serializable {
 
     //declaration of variables
     public static final int CONST_LIST_USERS = 0;
@@ -100,6 +101,7 @@ public abstract class ClackData {
      */
     protected String encrypt(String inputStringToEncrypt, String key) {
         String output = "";
+        key = key.toLowerCase();
         // single case dictionary
         String alphabet = "abcdefghijklmnopqrstuvwxyz";
         String low = inputStringToEncrypt.toLowerCase(); // to work on

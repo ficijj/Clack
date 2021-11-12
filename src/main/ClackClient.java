@@ -4,7 +4,12 @@ import data.ClackData;
 import data.FileClackData;
 import data.MessageClackData;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.util.Scanner;
 
 public class ClackClient {
@@ -16,8 +21,11 @@ public class ClackClient {
 
     private Scanner inFromStd;
 
+    private ObjectOutputStream inFromServer;
+    private ObjectInputStream outToServer;
     private ClackData dataToSendToServer;
     private ClackData dataToReceiveFromServer;
+    private ServerSocket sskt;
 
     private static int DEFAULT_PORT = 7000;
 
@@ -45,8 +53,11 @@ public class ClackClient {
             this.port = port;
         }
         closeConnection = false;
+        inFromServer = null;
+        outToServer = null;
         dataToSendToServer = null;
         dataToReceiveFromServer = null;
+        sskt = null;
     }
 
     /**
@@ -80,6 +91,12 @@ public class ClackClient {
      */
     public void start() {
         inFromStd = new Scanner(System.in);
+        try {
+            String serverName = "";
+            Socket skt = new Socket(serverName, port);
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
         while (!closeConnection) {
             readClientData();
             printData();
