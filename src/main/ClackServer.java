@@ -2,12 +2,20 @@ package main;
 
 import data.ClackData;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+
 public class ClackServer {
     private int port;
 
+    ObjectInputStream inFromClient;
+    ObjectOutputStream outToClient;
     private ClackData dataToReceiveFromClient;
     private ClackData dataToSendToClient;
 
+    ServerSocket sskt;
     private static final int DEFAULT_PORT = 7000;
 
     private boolean closeConnection;
@@ -17,10 +25,18 @@ public class ClackServer {
      *
      * @param port - port connection number
      */
-    public ClackServer(int port) {
-        this.port = port;
+    public ClackServer(int port) throws IllegalArgumentException {
+        if (port < 1024) {
+            throw new IllegalArgumentException("Port number is to low");
+        } else {
+            this.port = port;
+        }
+
+        inFromClient = null;
+        outToClient = null;
         dataToReceiveFromClient = null;
         dataToSendToClient = null;
+        sskt = null;
     }
 
     /**
@@ -42,12 +58,45 @@ public class ClackServer {
     }
 
     public void start() {
+        try {
+            sskt = new ServerSocket(DEFAULT_PORT);
+            System.out.println("Server started, waiting for connections... ");
+
+            outToClient = new ObjectOutputStream(sskt.accept().getOutputStream());
+            inFromClient = new ObjectInputStream(sskt.accept().getInputStream());
+            System.out.println("Connections made...");
+
+            while (!closeConnection) {
+                receiveData();
+                sendData();
+            }
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
     }
 
     public void receiveData() {
+        System.out.println("Receiving data...");
+        try {
+            dataToReceiveFromClient = (ClackData) inFromClient.readObject();
+            if (dataToReceiveFromClient == null) {
+                closeConnection = true;
+                System.out.println("Connection closing...");
+            } else {
+                System.out.println("Received data: " + dataToReceiveFromClient);
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     public void sendData() {
+        try {
+            outToClient.writeObject(dataToSendToClient);
+            outToClient.flush();
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
     }
 
     @Override
@@ -82,6 +131,17 @@ public class ClackServer {
                 ", dataToSendToClient=" + dataToSendToClient +
                 ", dataToReceiveFromClient=" + dataToReceiveFromClient +
                 '}';
+    }
+
+    public static void main(String[] args) {
+        ClackServer s = null;
+        if (args.length < 1) {
+            s = new ClackServer();
+        } else {
+            s = new ClackServer(Integer.parseInt(args[0]));
+        }
+        System.out.println(s);
+        s.start();
     }
 
 }
