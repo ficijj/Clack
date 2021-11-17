@@ -253,11 +253,15 @@ public class ClackClient {
                 c = new ClackClient(cmdArgs);
                 break;
             case 2: //user and host name
-                user = cmdArgs.split("@")[0];
-                host = cmdArgs.split("@")[1];
+                cmdArgs = args[0];
+                user = cmdArgs.substring(0, cmdArgs.indexOf('@'));
+                System.out.println("username: " + user);
+                host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
+                System.out.println("host name: " + host);
                 c = new ClackClient(user, host);
                 break;
             case 3: //username, hostname, and port number
+                cmdArgs = args[0];
                 user = cmdArgs.split("@")[0];
                 host = (cmdArgs.split("@")[1]).split(":")[0];
                 port = Integer.parseInt((cmdArgs.split("@")[1]).split(":")[1]);
