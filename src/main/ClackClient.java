@@ -97,7 +97,10 @@ public class ClackClient {
                 readClientData();
                 sendData();
                 receiveData();
-                printData();
+                if(dataToReceiveFromServer != null) {
+                    System.out.println("Printing data...");
+                    printData();
+                }
             }
             System.out.println("Closing connections...");
             inFromStd.close();
@@ -117,6 +120,7 @@ public class ClackClient {
         String input = inFromStd.nextLine();
         if (input.equals("DONE")) {
             closeConnection = true;
+            dataToSendToServer = null;
         } else if (input.length() > 7 && input.substring(0, 7).equals("SENDFILE")) {
             dataToSendToServer = new FileClackData("Anon", input.substring(9), ClackData.CONST_SEND_FILE);
             try {
@@ -148,6 +152,7 @@ public class ClackClient {
         try {
             System.out.println("Receiving data...");
             dataToReceiveFromServer = (ClackData) inFromServer.readObject();
+            System.out.println("Received data: " + dataToReceiveFromServer);
         } catch (IOException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
         }

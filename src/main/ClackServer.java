@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 public class ClackServer {
     private int port;
@@ -61,13 +62,15 @@ public class ClackServer {
         try {
             sskt = new ServerSocket(DEFAULT_PORT);
             System.out.println("Server started, waiting for connections... ");
+            Socket clientSocket = sskt.accept();
 
-            outToClient = new ObjectOutputStream(sskt.accept().getOutputStream());
-            inFromClient = new ObjectInputStream(sskt.accept().getInputStream());
+            outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
+            inFromClient = new ObjectInputStream(clientSocket.getInputStream());
             System.out.println("Connections made...");
 
             while (!closeConnection) {
                 receiveData();
+                dataToSendToClient = dataToReceiveFromClient;
                 sendData();
             }
         } catch (IOException ioe) {
