@@ -22,6 +22,8 @@ public class ClackClient {
     private ClackData dataToSendToServer;
     private ClackData dataToReceiveFromServer;
 
+    private ClientSideServerListener listener;
+
     Socket skt;
     private static int DEFAULT_PORT = 7000;
 
@@ -53,6 +55,9 @@ public class ClackClient {
         outToServer = null;
         dataToSendToServer = null;
         dataToReceiveFromServer = null;
+
+        listener = null;
+
         skt = null;
     }
 
@@ -93,14 +98,13 @@ public class ClackClient {
 
             outToServer = new ObjectOutputStream(skt.getOutputStream());
             inFromServer = new ObjectInputStream(skt.getInputStream());
+
+            Thread l = new Thread(new ClientSideServerListener(this));
+            l.start();
+
             while (!closeConnection) {
                 readClientData();
                 sendData();
-                receiveData();
-                if(dataToReceiveFromServer != null) {
-                    System.out.println("Printing data...");
-                    printData();
-                }
             }
             System.out.println("Closing connections...");
             inFromStd.close();
@@ -190,6 +194,14 @@ public class ClackClient {
      */
     public int getPort() {
         return port;
+    }
+
+    public boolean isCloseConnection() {
+        return closeConnection;
+    }
+
+    public void setCloseConnection(boolean closeConnection) {
+        this.closeConnection = closeConnection;
     }
 
     @Override
