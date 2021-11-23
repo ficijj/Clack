@@ -125,22 +125,25 @@ public class ClackClient {
         if (input.equals("DONE")) {
             closeConnection = true;
             dataToSendToServer = null;
-        } else if (input.length() > 7 && input.substring(0, 7).equals("SENDFILE")) {
-            dataToSendToServer = new FileClackData("Anon", input.substring(9), ClackData.CONST_SEND_FILE);
+        } else if (input.length() > 7 && input.substring(0, 8).equals("SENDFILE")) {
+            dataToSendToServer = new FileClackData(username, input.substring(9), ClackData.CONST_SEND_FILE);
             try {
                 ((FileClackData) dataToSendToServer).readFileContents();
             } catch (IOException e) {
                 dataToSendToServer = null;
                 System.err.println("File not able to be read. ");
             }
-        } else if (input.length() > 8 && input.substring(0, 8).equals("LISTUSERS")) {
+        } else if (input.length() > 8 && input.substring(0, 9).equals("LISTUSERS")) {
 
         } else {
-            dataToSendToServer = new MessageClackData("Anon", input, ClackData.CONST_SEND_MESSAGE);
+            dataToSendToServer = new MessageClackData(username, input, ClackData.CONST_SEND_MESSAGE);
             System.out.println("Data to be sent: " + dataToSendToServer);
         }
     }
 
+    /**
+     * Sends the data read in from stdin to the server
+     */
     public void sendData() {
         System.out.println("Sending data...");
         try {
@@ -152,6 +155,9 @@ public class ClackClient {
         }
     }
 
+    /**
+     * Receives any data sent by the server
+     */
     public void receiveData() {
         try {
             System.out.println("Receiving data...");
@@ -166,7 +172,7 @@ public class ClackClient {
      * Prints the data from dataToReceiveFromServer to stdout
      */
     public void printData() {
-        System.out.println(dataToReceiveFromServer.getData());
+        System.out.println(dataToReceiveFromServer.getUsername() + ": " + dataToReceiveFromServer.getData());
     }
 
     /**
@@ -196,10 +202,18 @@ public class ClackClient {
         return port;
     }
 
+    /**
+     * Tells you whether the connection is closed
+     * @return the connection status
+     */
     public boolean isCloseConnection() {
         return closeConnection;
     }
 
+    /**
+     * Sets the close connection to the value of the parameter
+     * @param closeConnection value to set close connection to
+     */
     public void setCloseConnection(boolean closeConnection) {
         this.closeConnection = closeConnection;
     }
@@ -262,6 +276,7 @@ public class ClackClient {
                 c = new ClackClient();
                 break;
             case 1: //just username
+                cmdArgs = args[0];
                 c = new ClackClient(cmdArgs);
                 break;
             case 2: //user and host name
@@ -284,6 +299,11 @@ public class ClackClient {
         c.start();
     }
 
+    /**
+     * Helper method to determine what command line arguments were entered
+     * @param args the command line arguments
+     * @return the case
+     */
     private static int determineCase(String args) {
         if (!args.contains("@") && !args.contains(":")) {
             return 1;

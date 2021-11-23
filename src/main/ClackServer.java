@@ -43,8 +43,6 @@ public class ClackServer {
         this(DEFAULT_PORT);
     }
 
-    //methods
-
     /**
      * Accessor for the port
      *
@@ -59,8 +57,9 @@ public class ClackServer {
             sskt = new ServerSocket(DEFAULT_PORT);
             System.out.println("Server started, waiting for connections... ");
             while(!closeConnection) {
-                serverSideClientIOList.add(new ServerSideClientIO(this, skt));
+                serverSideClientIOList.add(new ServerSideClientIO(this, sskt.accept()));
                 Thread l = new Thread(serverSideClientIOList.get(serverSideClientIOList.size() - 1));
+                l.start();
             }
             sskt.close();
         } catch (IOException ioe) {
@@ -68,13 +67,22 @@ public class ClackServer {
         }
     }
 
+    /**
+     * Sends out the recently received data to all available clients
+     * @param dataToBroadcastToClients the data to be sent out
+     */
     public synchronized void broadcast(ClackData dataToBroadcastToClients){
+        System.out.println("Broadcasting to: " + serverSideClientIOList);
         for (ServerSideClientIO e : serverSideClientIOList) {
             e.setDataToSendToClient(dataToBroadcastToClients);
             e.sendData();
         }
     }
 
+    /**
+     * Closes a single clients' connection to the server
+     * @param serverSideClientToRemove the specific client to be removed
+     */
     public synchronized void remove(ServerSideClientIO serverSideClientToRemove){
         serverSideClientIOList.remove(serverSideClientToRemove);
     }

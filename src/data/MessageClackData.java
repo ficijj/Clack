@@ -23,7 +23,7 @@ public class MessageClackData extends ClackData {
      * Constructor that sets all variables to default values
      */
     public MessageClackData() {
-        this("Anon", " ", 0);
+        this("Anon", "", 0);
     }
 
     /**

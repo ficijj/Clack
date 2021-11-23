@@ -6,8 +6,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 public abstract class ClackData implements Serializable {
-
-    //declaration of variables
     public static final int CONST_LIST_USERS = 0;
     public static final int CONST_LOG_OUT = 1;
     public static final int CONST_SEND_MESSAGE = 2;
@@ -16,8 +14,6 @@ public abstract class ClackData implements Serializable {
     private String username;
     private int type;
     private Date date;
-
-    //constructors
 
     /**
      * Constructor that sets username and type to user defined values and the date to the date when called
