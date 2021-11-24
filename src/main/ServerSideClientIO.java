@@ -10,6 +10,7 @@ import java.net.Socket;
 
 public class ServerSideClientIO implements Runnable{
     private boolean closeConnection;
+    private boolean receivedUsername;
 
     private ClackData dataToReceiveFromClient;
     private ClackData dataToSendToClient;
@@ -22,6 +23,7 @@ public class ServerSideClientIO implements Runnable{
 
     public ServerSideClientIO(ClackServer s, Socket skt){
         closeConnection = false;
+        receivedUsername = false;
 
         dataToReceiveFromClient = null;
         dataToSendToClient = null;
@@ -50,14 +52,28 @@ public class ServerSideClientIO implements Runnable{
             outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
             inFromClient = new ObjectInputStream(clientSocket.getInputStream());
 
+            receiveUsername();
             while(!closeConnection){
                 receiveData();
-                if(dataToReceiveFromClient != null) {
+                if(dataToReceiveFromClient != null && !receivedUsername) {
                     server.broadcast(dataToSendToClient);
                 }
+                receivedUsername = false;
             }
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
+        }
+    }
+
+    /**
+     * Receives a string object from a connecting client to store in usernames array list
+     */
+    public void receiveUsername(){
+//        System.out.println("Receiving username...");
+        try {
+            server.usernames.add((String) inFromClient.readObject());
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -67,7 +83,7 @@ public class ServerSideClientIO implements Runnable{
     public void sendData() {
         try {
             outToClient.writeObject(dataToSendToClient);
-            System.out.println("Data being sent to client: " + dataToSendToClient);
+//            System.out.println("Data being sent to client: " + dataToSendToClient);
             outToClient.flush();
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
@@ -86,15 +102,24 @@ public class ServerSideClientIO implements Runnable{
      * Receive data from a client
      */
     public void receiveData() {
-        System.out.println("Receiving data...");
+//        System.out.println("Receiving data...");
         try {
             dataToReceiveFromClient = (ClackData) inFromClient.readObject();
             if (dataToReceiveFromClient == null) {
                 closeConnection = true;
                 server.remove(this);
-                System.out.println("Connection closing...");
+//                System.out.println("Connection closing...");
+            } else if(dataToReceiveFromClient.getType() == ClackData.CONST_LIST_USERS) {
+                String users = "";
+                for(String e : server.usernames){
+                    users += e;
+                    users += ',';
+                }
+                users = users.substring(0, users.length() - 1);
+                server.broadcast(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
+                receivedUsername = true;
             } else {
-                System.out.println("Received data: " + dataToReceiveFromClient);
+//                System.out.println("Received data: " + dataToReceiveFromClient);
             }
         } catch (IOException | ClassNotFoundException e) {
             System.err.println(e.getMessage());

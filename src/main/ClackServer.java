@@ -19,6 +19,7 @@ public class ClackServer {
     private boolean closeConnection;
 
     ArrayList<ServerSideClientIO> serverSideClientIOList;
+    ArrayList<String> usernames;
 
     /**
      * Constructor that sets the port number to the provided value and all other instance variables to their defaults
@@ -34,6 +35,7 @@ public class ClackServer {
         sskt = null;
         skt = null;
         serverSideClientIOList = new ArrayList<ServerSideClientIO>();
+        usernames = new ArrayList<String>();
     }
 
     /**
@@ -55,7 +57,7 @@ public class ClackServer {
     public void start() {
         try {
             sskt = new ServerSocket(DEFAULT_PORT);
-            System.out.println("Server started, waiting for connections... ");
+//            System.out.println("Server started, waiting for connections... ");
             while(!closeConnection) {
                 serverSideClientIOList.add(new ServerSideClientIO(this, sskt.accept()));
                 Thread l = new Thread(serverSideClientIOList.get(serverSideClientIOList.size() - 1));
@@ -72,7 +74,7 @@ public class ClackServer {
      * @param dataToBroadcastToClients the data to be sent out
      */
     public synchronized void broadcast(ClackData dataToBroadcastToClients){
-        System.out.println("Broadcasting to: " + serverSideClientIOList);
+//        System.out.println("Broadcasting to: " + serverSideClientIOList);
         for (ServerSideClientIO e : serverSideClientIOList) {
             e.setDataToSendToClient(dataToBroadcastToClients);
             e.sendData();
@@ -80,11 +82,13 @@ public class ClackServer {
     }
 
     /**
-     * Closes a single clients' connection to the server
+     * Closes a single clients' connection to the server and removes its username from the list
      * @param serverSideClientToRemove the specific client to be removed
      */
     public synchronized void remove(ServerSideClientIO serverSideClientToRemove){
-        serverSideClientIOList.remove(serverSideClientToRemove);
+        int index = serverSideClientIOList.indexOf(serverSideClientToRemove);
+        usernames.remove(index);
+        serverSideClientIOList.remove(index);
     }
 
     @Override
@@ -121,7 +125,7 @@ public class ClackServer {
         } else {
             s = new ClackServer(Integer.parseInt(args[0]));
         }
-        System.out.println(s);
+//        System.out.println(s);
         s.start();
     }
 
