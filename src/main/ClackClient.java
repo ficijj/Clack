@@ -93,8 +93,7 @@ public class ClackClient {
     public void start() {
         inFromStd = new Scanner(System.in);
         try {
-            String serverName = "localhost";
-            skt = new Socket(serverName, DEFAULT_PORT);
+            skt = new Socket(hostName, DEFAULT_PORT);
 
             outToServer = new ObjectOutputStream(skt.getOutputStream());
             inFromServer = new ObjectInputStream(skt.getInputStream());
@@ -102,11 +101,12 @@ public class ClackClient {
             Thread l = new Thread(new ClientSideServerListener(this));
             l.start();
 
+            sendUsername();
             while (!closeConnection) {
                 readClientData();
                 sendData();
             }
-            System.out.println("Closing connections...");
+//            System.out.println("Closing connections...");
             inFromStd.close();
             skt.close();
             outToServer.close();
@@ -117,10 +117,24 @@ public class ClackClient {
     }
 
     /**
+     * Sends a string object containing only the clients username to be stored by the server
+     */
+    public void sendUsername(){
+//        System.out.println("Sending username...");
+        try {
+            outToServer.writeObject(username);
+            outToServer.flush();
+//            System.out.println("Data flushed...");
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
+    }
+
+    /**
      * Reads the data from stdin and takes the corresponding actions
      */
     public void readClientData() {
-        System.out.println("Reading client data...");
+//        System.out.println("Reading client data...");
         String input = inFromStd.nextLine();
         if (input.equals("DONE")) {
             closeConnection = true;
@@ -134,10 +148,10 @@ public class ClackClient {
                 System.err.println("File not able to be read. ");
             }
         } else if (input.length() > 8 && input.substring(0, 9).equals("LISTUSERS")) {
-
+            dataToSendToServer = new MessageClackData(null, null, ClackData.CONST_LIST_USERS);
         } else {
             dataToSendToServer = new MessageClackData(username, input, ClackData.CONST_SEND_MESSAGE);
-            System.out.println("Data to be sent: " + dataToSendToServer);
+//            System.out.println("Data to be sent: " + dataToSendToServer);
         }
     }
 
@@ -145,11 +159,11 @@ public class ClackClient {
      * Sends the data read in from stdin to the server
      */
     public void sendData() {
-        System.out.println("Sending data...");
+//        System.out.println("Sending data...");
         try {
             outToServer.writeObject(dataToSendToServer);
             outToServer.flush();
-            System.out.println("Data flushed...");
+//            System.out.println("Data flushed...");
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }
@@ -160,9 +174,9 @@ public class ClackClient {
      */
     public void receiveData() {
         try {
-            System.out.println("Receiving data...");
+//            System.out.println("Receiving data...");
             dataToReceiveFromServer = (ClackData) inFromServer.readObject();
-            System.out.println("Received data: " + dataToReceiveFromServer);
+//            System.out.println("Received data: " + dataToReceiveFromServer);
         } catch (IOException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
         }
@@ -282,9 +296,9 @@ public class ClackClient {
             case 2: //user and host name
                 cmdArgs = args[0];
                 user = cmdArgs.substring(0, cmdArgs.indexOf('@'));
-                System.out.println("username: " + user);
+//                System.out.println("username: " + user);
                 host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
-                System.out.println("host name: " + host);
+//                System.out.println("host name: " + host);
                 c = new ClackClient(user, host);
                 break;
             case 3: //username, hostname, and port number
@@ -295,7 +309,7 @@ public class ClackClient {
                 c = new ClackClient(user, host, port);
                 break;
         }
-        System.out.println(c);
+//        System.out.println(c);
         c.start();
     }
 
