@@ -111,12 +111,16 @@ public class ServerSideClientIO implements Runnable{
 //                System.out.println("Connection closing...");
             } else if(dataToReceiveFromClient.getType() == ClackData.CONST_LIST_USERS) {
                 String users = "";
+                String userWhoRequested = dataToReceiveFromClient.getUsername();
                 for(String e : server.usernames){
                     users += e;
                     users += ',';
                 }
                 users = users.substring(0, users.length() - 1);
-                server.broadcast(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
+//                ServerSideClientIO s = server.serverSideClientIOList.get(server.usernames.indexOf(userWhoRequested));
+                outToClient.writeObject(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
+                outToClient.flush();
+//                server.broadcast(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
                 receivedUsername = true;
             } else {
 //                System.out.println("Received data: " + dataToReceiveFromClient);

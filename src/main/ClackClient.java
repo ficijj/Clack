@@ -148,7 +148,7 @@ public class ClackClient {
                 System.err.println("File not able to be read. ");
             }
         } else if (input.length() > 8 && input.substring(0, 9).equals("LISTUSERS")) {
-            dataToSendToServer = new MessageClackData(null, null, ClackData.CONST_LIST_USERS);
+            dataToSendToServer = new MessageClackData(username, null, ClackData.CONST_LIST_USERS);
         } else {
             dataToSendToServer = new MessageClackData(username, input, ClackData.CONST_SEND_MESSAGE);
 //            System.out.println("Data to be sent: " + dataToSendToServer);
