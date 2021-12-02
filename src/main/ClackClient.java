@@ -119,7 +119,7 @@ public class ClackClient {
     /**
      * Sends a string object containing only the clients username to be stored by the server
      */
-    public void sendUsername(){
+    public void sendUsername() {
 //        System.out.println("Sending username...");
         try {
             outToServer.writeObject(username);
@@ -218,6 +218,7 @@ public class ClackClient {
 
     /**
      * Tells you whether the connection is closed
+     *
      * @return the connection status
      */
     public boolean isCloseConnection() {
@@ -226,6 +227,7 @@ public class ClackClient {
 
     /**
      * Sets the close connection to the value of the parameter
+     *
      * @param closeConnection value to set close connection to
      */
     public void setCloseConnection(boolean closeConnection) {
@@ -315,6 +317,7 @@ public class ClackClient {
 
     /**
      * Helper method to determine what command line arguments were entered
+     *
      * @param args the command line arguments
      * @return the case
      */

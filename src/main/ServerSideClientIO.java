@@ -69,7 +69,7 @@ public class ServerSideClientIO implements Runnable{
      * Receives a string object from a connecting client to store in usernames array list
      */
     public void receiveUsername(){
-//        System.out.println("Receiving username...");
+        System.out.println("Receiving username...");
         try {
             server.usernames.add((String) inFromClient.readObject());
         } catch (IOException | ClassNotFoundException e) {
@@ -83,7 +83,7 @@ public class ServerSideClientIO implements Runnable{
     public void sendData() {
         try {
             outToClient.writeObject(dataToSendToClient);
-//            System.out.println("Data being sent to client: " + dataToSendToClient);
+            System.out.println("Data being sent to client: " + dataToSendToClient);
             outToClient.flush();
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
@@ -102,13 +102,13 @@ public class ServerSideClientIO implements Runnable{
      * Receive data from a client
      */
     public void receiveData() {
-//        System.out.println("Receiving data...");
+        System.out.println("Receiving data...");
         try {
             dataToReceiveFromClient = (ClackData) inFromClient.readObject();
             if (dataToReceiveFromClient == null) {
                 closeConnection = true;
                 server.remove(this);
-//                System.out.println("Connection closing...");
+                System.out.println("Connection closing...");
             } else if(dataToReceiveFromClient.getType() == ClackData.CONST_LIST_USERS) {
                 String users = "";
                 String userWhoRequested = dataToReceiveFromClient.getUsername();
@@ -117,13 +117,13 @@ public class ServerSideClientIO implements Runnable{
                     users += ',';
                 }
                 users = users.substring(0, users.length() - 1);
-//                ServerSideClientIO s = server.serverSideClientIOList.get(server.usernames.indexOf(userWhoRequested));
+                ServerSideClientIO s = server.serverSideClientIOList.get(server.usernames.indexOf(userWhoRequested));
                 outToClient.writeObject(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
                 outToClient.flush();
-//                server.broadcast(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
+                server.broadcast(new MessageClackData("server", users, ClackData.CONST_SEND_MESSAGE));
                 receivedUsername = true;
             } else {
-//                System.out.println("Received data: " + dataToReceiveFromClient);
+                System.out.println("Received data: " + dataToReceiveFromClient);
             }
         } catch (IOException | ClassNotFoundException e) {
             System.err.println(e.getMessage());

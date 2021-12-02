@@ -3,8 +3,6 @@ package main;
 import data.ClackData;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -34,6 +32,7 @@ public class ClackServer {
         }
         sskt = null;
         skt = null;
+        closeConnection = false;
         serverSideClientIOList = new ArrayList<ServerSideClientIO>();
         usernames = new ArrayList<String>();
     }
@@ -57,7 +56,7 @@ public class ClackServer {
     public void start() {
         try {
             sskt = new ServerSocket(DEFAULT_PORT);
-//            System.out.println("Server started, waiting for connections... ");
+            System.out.println("Server started, waiting for connections... ");
             while(!closeConnection) {
                 serverSideClientIOList.add(new ServerSideClientIO(this, sskt.accept()));
                 Thread l = new Thread(serverSideClientIOList.get(serverSideClientIOList.size() - 1));
@@ -74,7 +73,7 @@ public class ClackServer {
      * @param dataToBroadcastToClients the data to be sent out
      */
     public synchronized void broadcast(ClackData dataToBroadcastToClients){
-//        System.out.println("Broadcasting to: " + serverSideClientIOList);
+        System.out.println("Broadcasting to: " + serverSideClientIOList);
         for (ServerSideClientIO e : serverSideClientIOList) {
             e.setDataToSendToClient(dataToBroadcastToClients);
             e.sendData();
@@ -125,7 +124,7 @@ public class ClackServer {
         } else {
             s = new ClackServer(Integer.parseInt(args[0]));
         }
-//        System.out.println(s);
+        System.out.println(s);
         s.start();
     }
 
