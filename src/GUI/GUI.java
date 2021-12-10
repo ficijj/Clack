@@ -1,6 +1,8 @@
+package GUI;
+
+import data.ClackData;
+import data.MessageClackData;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -9,20 +11,74 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.scene.control.TextField;
-
-import java.awt.*;
+import main.ClackClient;
 
 public class GUI extends Application {
-
+    private static MessageBuffer buffer;
+    private static ClackClient client;
     public static void main(String[] args) {
+        buffer = new MessageBuffer();
+
+        createClient(args);
+        Thread t = new Thread(client);
+        t.start();
+
         launch(args);
+    }
+
+    private static void createClient(String[] args){
+        int port = 0;
+        String user = null;
+        String host = null;
+        String cmdArgs = "";
+        ClackClient c = null;
+
+        int path = 0;
+        if (args.length != 0) {
+            path = determineCase(args[0]);
+        }
+
+        switch (path) {
+            case 0: //no args
+                client = new ClackClient(buffer);
+                break;
+            case 1: //just username
+                cmdArgs = args[0];
+                client = new ClackClient(cmdArgs, buffer);
+                break;
+            case 2: //user and host name
+                cmdArgs = args[0];
+                user = cmdArgs.substring(0, cmdArgs.indexOf('@'));
+//                System.out.println("username: " + user);
+                host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
+//                System.out.println("host name: " + host);
+                client = new ClackClient(user, host, buffer);
+                break;
+            case 3: //username, hostname, and port number
+                cmdArgs = args[0];
+                user = cmdArgs.split("@")[0];
+                host = (cmdArgs.split("@")[1]).split(":")[0];
+                port = Integer.parseInt((cmdArgs.split("@")[1]).split(":")[1]);
+                c = new ClackClient(user, host, port, buffer);
+                break;
+        }
+    }
+
+    private static int determineCase(String args) {
+        if (!args.contains("@") && !args.contains(":")) {
+            return 1;
+        } else if (args.contains("@") && !args.contains(":")) {
+            return 2;
+        } else if (args.contains("@") && args.contains(":")) {
+            return 3;
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -47,6 +103,7 @@ public class GUI extends Application {
         EventHandler<ActionEvent> sendButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                buffer.makeMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
                 tfInput.setText("");
             }
         };
@@ -56,6 +113,7 @@ public class GUI extends Application {
             @Override
             public void handle(KeyEvent event) {
                 if(event.getCode().equals(KeyCode.ENTER)){
+                    buffer.makeMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
                     tfInput.setText("");
                 }
             }
@@ -91,6 +149,8 @@ public class GUI extends Application {
         hBoxInput.getChildren().add(tfInput);
         hBoxInput.getChildren().add(sendButton);
         hBoxInput.getChildren().add(mmButton);
+
+        root.getStylesheets().add(getClass().getResource("GUI/application.css").toExternalForm());
 
         primaryStage.setScene( new Scene(root, 600, 400));
         primaryStage.setTitle("Clack");

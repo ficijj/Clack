@@ -1,5 +1,6 @@
 package main;
 
+import GUI.MessageBuffer;
 import data.ClackData;
 import data.FileClackData;
 import data.MessageClackData;
@@ -8,7 +9,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class ClackClient {
+public class ClackClient implements Runnable{
+    private MessageBuffer buffer;
+
     private String username;
     private String hostName;
     private String key;
@@ -34,7 +37,7 @@ public class ClackClient {
      * @param hostName Name of the host
      * @param port     Number to be used for connection to the server
      */
-    public ClackClient(String username, String hostName, int port) throws IllegalArgumentException {
+    public ClackClient(String username, String hostName, int port, MessageBuffer buffer) throws IllegalArgumentException {
         if (username == null) {
             throw new IllegalArgumentException("Username is null");
         } else {
@@ -50,6 +53,7 @@ public class ClackClient {
         } else {
             this.port = port;
         }
+        this.buffer = buffer;
         closeConnection = false;
         inFromServer = null;
         outToServer = null;
@@ -67,8 +71,8 @@ public class ClackClient {
      * @param username Name of the user
      * @param hostName Name of the host
      */
-    public ClackClient(String username, String hostName) {
-        this(username, hostName, DEFAULT_PORT);
+    public ClackClient(String username, String hostName, MessageBuffer buffer) {
+        this(username, hostName, DEFAULT_PORT, buffer);
     }
 
     /**
@@ -76,21 +80,21 @@ public class ClackClient {
      *
      * @param username Name of the user
      */
-    public ClackClient(String username) {
-        this(username, "localhost");
+    public ClackClient(String username, MessageBuffer buffer) {
+        this(username, "localhost", buffer);
     }
 
     /**
      * Constructor that sets all instance variables to their default values
      */
-    public ClackClient() {
-        this("Anon");
+    public ClackClient(MessageBuffer buffer) {
+        this("Anon", buffer);
     }
 
     /**
      * Starts the client and continues to read input from stdin and print it as long as the connection remains open
      */
-    public void start() {
+    public void run() {
         inFromStd = new Scanner(System.in);
         try {
             skt = new Socket(hostName, DEFAULT_PORT);
@@ -139,7 +143,7 @@ public class ClackClient {
         if (input.equals("DONE")) {
             closeConnection = true;
             dataToSendToServer = null;
-        } else if (input.length() > 7 && input.substring(0, 8).equals("SENDFILE")) {
+        } else if (input.length() > 7 && input.startsWith("SENDFILE")) {
             dataToSendToServer = new FileClackData(username, input.substring(9), ClackData.CONST_SEND_FILE);
             try {
                 ((FileClackData) dataToSendToServer).readFileContents();
@@ -147,7 +151,7 @@ public class ClackClient {
                 dataToSendToServer = null;
                 System.err.println("File not able to be read. ");
             }
-        } else if (input.length() > 8 && input.substring(0, 9).equals("LISTUSERS")) {
+        } else if (input.length() > 8 && input.startsWith("LISTUSERS")) {
             dataToSendToServer = new MessageClackData(username, null, ClackData.CONST_LIST_USERS);
         } else {
             dataToSendToServer = new MessageClackData(username, input, ClackData.CONST_SEND_MESSAGE);
@@ -160,6 +164,7 @@ public class ClackClient {
      */
     public void sendData() {
 //        System.out.println("Sending data...");
+        dataToSendToServer = buffer.readMessage();
         try {
             outToServer.writeObject(dataToSendToServer);
             outToServer.flush();
@@ -289,11 +294,11 @@ public class ClackClient {
 
         switch (path) {
             case 0: //no args
-                c = new ClackClient();
+                c = new ClackClient(c.buffer);
                 break;
             case 1: //just username
                 cmdArgs = args[0];
-                c = new ClackClient(cmdArgs);
+                c = new ClackClient(cmdArgs, c.buffer);
                 break;
             case 2: //user and host name
                 cmdArgs = args[0];
@@ -301,18 +306,17 @@ public class ClackClient {
 //                System.out.println("username: " + user);
                 host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
 //                System.out.println("host name: " + host);
-                c = new ClackClient(user, host);
+                c = new ClackClient(user, host, c.buffer);
                 break;
             case 3: //username, hostname, and port number
                 cmdArgs = args[0];
                 user = cmdArgs.split("@")[0];
                 host = (cmdArgs.split("@")[1]).split(":")[0];
                 port = Integer.parseInt((cmdArgs.split("@")[1]).split(":")[1]);
-                c = new ClackClient(user, host, port);
+                c = new ClackClient(user, host, port, c.buffer);
                 break;
         }
 //        System.out.println(c);
-        c.start();
     }
 
     /**
