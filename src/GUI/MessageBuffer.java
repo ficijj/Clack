@@ -1,37 +1,70 @@
 package GUI;
 
 import data.MessageClackData;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
+import java.util.ArrayList;
 
 public class MessageBuffer {
-    private MessageClackData message;
-    private boolean messageRead = false;
-    private Object lock = new Object();
+    private MessageClackData outGoingMessage;
+    private boolean outgoingMessageToRead = false;
+    private Object outgoingLock = new Object();
 
-    public synchronized MessageClackData readMessage(){
-        while(messageRead){
-            try{
-                lock.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    private ArrayList<String> messagesList = new ArrayList<String>();
+    private ObservableList<String> messageOList = FXCollections.observableList(messagesList);
+
+    private ArrayList<String> usersList = new ArrayList<String>();
+    private ObservableList<String> usersOList = FXCollections.observableList(usersList);
+
+    private boolean closeConnection = false;
+
+    public MessageClackData readOutgoingMessage() {
+        synchronized (outgoingLock) {
+            while (!outgoingMessageToRead) {
+                try {
+                    outgoingLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        messageRead = false;
-        lock.notify();
+            outgoingMessageToRead = false;
+            outgoingLock.notifyAll();
 
-        return message;
+            return outGoingMessage;
+        }
     }
 
-    public synchronized void makeMessage(MessageClackData message){
-        while(!messageRead){
-            try{
-                lock.wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+    public void makeOutgoingMessage(MessageClackData message) {
+        synchronized (outgoingLock) {
+            while (outgoingMessageToRead) {
+                try {
+                    outgoingLock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        messageRead = true;
-        lock.notify();
+            outgoingMessageToRead = true;
+            outgoingLock.notifyAll();
 
-        this.message = message;
+            this.outGoingMessage = message;
+        }
+    }
+
+    public ObservableList<String> getMessageOList() {
+        return messageOList;
+    }
+
+    public ObservableList<String> getUsersOList() {
+        System.out.println("user list requested");
+        return usersOList;
+    }
+
+    public boolean isCloseConnection() {
+        return closeConnection;
+    }
+
+    public void setCloseConnection(boolean closeConnection) {
+        this.closeConnection = closeConnection;
     }
 }

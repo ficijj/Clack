@@ -9,7 +9,7 @@ import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
 
-public class ClackClient implements Runnable{
+public class ClackClient implements Runnable {
     private MessageBuffer buffer;
 
     private String username;
@@ -102,15 +102,16 @@ public class ClackClient implements Runnable{
             outToServer = new ObjectOutputStream(skt.getOutputStream());
             inFromServer = new ObjectInputStream(skt.getInputStream());
 
-            Thread l = new Thread(new ClientSideServerListener(this));
+            Thread l = new Thread(new ClientSideServerListener(this, buffer));
             l.start();
 
             sendUsername();
-            while (!closeConnection) {
-                readClientData();
+            while (!buffer.isCloseConnection()) {
+                dataToSendToServer = buffer.readOutgoingMessage();
+                System.out.println("sending : " + dataToSendToServer);
                 sendData();
             }
-//            System.out.println("Closing connections...");
+            System.out.println("Closing connections...");
             inFromStd.close();
             skt.close();
             outToServer.close();
@@ -121,14 +122,21 @@ public class ClackClient implements Runnable{
     }
 
     /**
-     * Sends a string object containing only the clients username to be stored by the server
+     * Sends a string object containing only the clients' username to be stored by the server
      */
     public void sendUsername() {
-//        System.out.println("Sending username...");
+        System.out.println("Sending username...");
         try {
             outToServer.writeObject(username);
             outToServer.flush();
-//            System.out.println("Data flushed...");
+            System.out.println("Data flushed...");
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
+
+        try {
+            outToServer.writeObject(new MessageClackData(username, null, ClackData.CONST_LIST_USERS));
+            outToServer.flush();
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }
@@ -163,12 +171,11 @@ public class ClackClient implements Runnable{
      * Sends the data read in from stdin to the server
      */
     public void sendData() {
-//        System.out.println("Sending data...");
-        dataToSendToServer = buffer.readMessage();
+        System.out.println("Sending data...");
         try {
             outToServer.writeObject(dataToSendToServer);
             outToServer.flush();
-//            System.out.println("Data flushed...");
+            System.out.println("Data flushed...");
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }
@@ -181,6 +188,13 @@ public class ClackClient implements Runnable{
         try {
 //            System.out.println("Receiving data...");
             dataToReceiveFromServer = (ClackData) inFromServer.readObject();
+            if(dataToReceiveFromServer.getUsername() == "server"){
+                System.out.println("getting user list...");
+                buffer.getUsersOList().add(dataToReceiveFromServer.getData());
+            } else {
+
+                buffer.getMessageOList().add(dataToReceiveFromServer.getUsername() + ": " + dataToReceiveFromServer.getData() + '\n');
+            }
 //            System.out.println("Received data: " + dataToReceiveFromServer);
         } catch (IOException | ClassNotFoundException e) {
             System.err.println(e.getMessage());
@@ -192,6 +206,8 @@ public class ClackClient implements Runnable{
      */
     public void printData() {
         System.out.println(dataToReceiveFromServer.getUsername() + ": " + dataToReceiveFromServer.getData());
+//        buffer.makeIncomingMessage(new MessageClackData(dataToReceiveFromServer.getUsername(), dataToReceiveFromServer.getData(), ClackData.CONST_SEND_MESSAGE));
+//        tfOutput.setText(tfOutput.getText() + buffer.readIncomingMessage().getUsername() + ": \n" + buffer.readIncomingMessage().getData() + "\n");
     }
 
     /**

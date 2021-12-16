@@ -6,11 +6,7 @@
     -fx-control-inner-background-alt: -fx-control-inner-background ;
 }
 
-.label{
-    -fx-text-fill: lightgray;
-}
-
-.text-field {
+.text-area {
     -fx-prompt-text-fill: gray;
 }
 

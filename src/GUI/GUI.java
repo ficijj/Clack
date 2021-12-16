@@ -3,12 +3,17 @@ package GUI;
 import data.ClackData;
 import data.MessageClackData;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
@@ -20,91 +25,78 @@ import main.ClackClient;
 
 public class GUI extends Application {
     private static MessageBuffer buffer;
-    private static ClackClient client;
+    private static ClackClient client = null;
+
     public static void main(String[] args) {
         buffer = new MessageBuffer();
 
-        createClient(args);
-        Thread t = new Thread(client);
-        t.start();
-
-        launch(args);
+        launch();
     }
 
-    private static void createClient(String[] args){
-        int port = 0;
-        String user = null;
-        String host = null;
-        String cmdArgs = "";
-        ClackClient c = null;
-
-        int path = 0;
-        if (args.length != 0) {
-            path = determineCase(args[0]);
-        }
-
-        switch (path) {
-            case 0: //no args
-                client = new ClackClient(buffer);
-                break;
-            case 1: //just username
-                cmdArgs = args[0];
-                client = new ClackClient(cmdArgs, buffer);
-                break;
-            case 2: //user and host name
-                cmdArgs = args[0];
-                user = cmdArgs.substring(0, cmdArgs.indexOf('@'));
-//                System.out.println("username: " + user);
-                host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
-//                System.out.println("host name: " + host);
-                client = new ClackClient(user, host, buffer);
-                break;
-            case 3: //username, hostname, and port number
-                cmdArgs = args[0];
-                user = cmdArgs.split("@")[0];
-                host = (cmdArgs.split("@")[1]).split(":")[0];
-                port = Integer.parseInt((cmdArgs.split("@")[1]).split(":")[1]);
-                c = new ClackClient(user, host, port, buffer);
-                break;
-        }
-    }
-
-    private static int determineCase(String args) {
-        if (!args.contains("@") && !args.contains(":")) {
-            return 1;
-        } else if (args.contains("@") && !args.contains(":")) {
-            return 2;
-        } else if (args.contains("@") && args.contains(":")) {
-            return 3;
+    private static void createClient(String username, String hostname, String port) {
+        if (username == null && hostname == null && new Integer(port) == null) {
+            client = new ClackClient(buffer);
+        } else if (username != null && hostname == null && new Integer(port) == null) {
+            client = new ClackClient(username, buffer);
+        } else if (username != null && hostname != null && new Integer(port) == null) {
+            client = new ClackClient(username, hostname, buffer);
         } else {
-            return 0;
+            client = new ClackClient(username, hostname, Integer.parseInt(port), buffer);
+            System.out.println(client);
         }
+    }
+
+    @Override
+    public void stop(){
+        buffer.setCloseConnection(true);
+        buffer.makeOutgoingMessage(null);
     }
 
     @Override
     public void start(Stage primaryStage) {
         FlowPane root = new FlowPane();
-        root.setPadding(new Insets(20,20,20,20));
+        root.setPadding(new Insets(20, 20, 20, 20));
         VBox outerVBox = new VBox();
 
         HBox hBoxOutput = new HBox();
-        TextField tfOutput = new TextField("output area");
-        TextField userList = new TextField("users");
+        TextArea tfOutput = new TextArea();
+        TextArea userList = new TextArea();
 
         HBox hBoxInput = new HBox();
-        TextField tfInput = new TextField("input area");
+        TextField tfInput = new TextField();
         Button sendButton = new Button("Send");
         Button mmButton = new Button("MM");
 
+        tfOutput.setWrapText(true);
         tfOutput.setEditable(false);
-
+        userList.setWrapText(true);
         userList.setEditable(false);
+
+        tfOutput.textProperty().addListener(new ChangeListener<String>() {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+                tfOutput.setScrollTop(Double.MAX_VALUE);
+            }
+        });
+
+        buffer.getUsersOList().addListener(new ListChangeListener<String>() {
+            @Override
+            public void onChanged(Change<? extends String> c) {
+                userList.setText(c.getList().toString());
+            }
+        });
+
+        buffer.getMessageOList().addListener(new ListChangeListener<String>() {
+            @Override
+            public void onChanged(Change<? extends String> c) {
+                tfOutput.appendText(c.getList().get(c.getList().size() - 1));
+            }
+        });
 
         EventHandler<ActionEvent> sendButtonHandler = new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                buffer.makeMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
-                tfInput.setText("");
+                buffer.makeOutgoingMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
             }
         };
         sendButton.setOnAction(sendButtonHandler);
@@ -112,8 +104,8 @@ public class GUI extends Application {
         EventHandler<KeyEvent> keyHandler = new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                if(event.getCode().equals(KeyCode.ENTER)){
-                    buffer.makeMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
+                if (event.getCode().equals(KeyCode.ENTER)) {
+                    buffer.makeOutgoingMessage(new MessageClackData(client.getUsername(), tfInput.getText(), ClackData.CONST_SEND_MESSAGE));
                     tfInput.setText("");
                 }
             }
@@ -121,22 +113,22 @@ public class GUI extends Application {
         tfInput.setOnKeyPressed(keyHandler);
 
         root.setAlignment(Pos.BOTTOM_CENTER);
-        tfOutput.setAlignment(Pos.BOTTOM_LEFT);
-        userList.setAlignment(Pos.TOP_LEFT);
+//        tfOutput.setAlignment(Pos.BOTTOM_LEFT);
+//        userList.setAlignment(Pos.TOP_LEFT);
 
         tfOutput.setMinSize(400, 300);
-        tfOutput.setMaxSize(5000,5000);
+        tfOutput.setMaxSize(5000, 5000);
 
         userList.setMinSize(90, 300);
         userList.setMaxSize(90, 300);
 
-        tfInput.setMinSize(400, 30);
-        tfInput.setMaxSize(5000,30);
+        tfInput.setMinSize(478, 30);
+        tfInput.setMaxSize(5000, 30);
 
-        sendButton.setMinSize(45,30);
-        sendButton.setMaxSize(45,30);
-        mmButton.setMinSize(45,30);
-        mmButton.setMaxSize(45,30);
+        sendButton.setMinSize(45, 30);
+        sendButton.setMaxSize(45, 30);
+        mmButton.setMinSize(45, 30);
+        mmButton.setMaxSize(45, 30);
 
         root.getChildren().add(outerVBox);
 
@@ -150,9 +142,41 @@ public class GUI extends Application {
         hBoxInput.getChildren().add(sendButton);
         hBoxInput.getChildren().add(mmButton);
 
-        root.getStylesheets().add(getClass().getResource("GUI/application.css").toExternalForm());
+        root.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
 
-        primaryStage.setScene( new Scene(root, 600, 400));
+        FlowPane signIn = new FlowPane();
+        signIn.setPadding(new Insets(20, 20, 20, 20));
+
+        VBox sIVbox = new VBox();
+
+        Label username = new Label("username: ");
+        TextField tfUsername = new TextField("anon");
+
+        Label hostName = new Label("host: ");
+        TextField tfHostName = new TextField("localhost");
+
+        Label port = new Label("port: ");
+        TextField tfPort = new TextField("7000");
+
+        Button signInButton = new Button("sign in");
+        signInButton.setAlignment(Pos.CENTER);
+
+        EventHandler<ActionEvent> signInButtonHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                createClient(tfUsername.getText(), tfHostName.getText(), tfPort.getText());
+                Thread c = new Thread(client);
+                c.start();
+                primaryStage.setScene(new Scene(root, 600, 400));
+            }
+        };
+        signInButton.setOnAction(signInButtonHandler);
+
+        sIVbox.getChildren().addAll(username, tfUsername, hostName, tfHostName, port, tfPort, signInButton);
+
+        sIVbox.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+
+        primaryStage.setScene(new Scene(sIVbox, 600, 400));
         primaryStage.setTitle("Clack");
         primaryStage.setResizable(false);
         primaryStage.show();

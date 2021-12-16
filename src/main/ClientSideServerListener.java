@@ -1,10 +1,13 @@
 package main;
 
+import GUI.MessageBuffer;
+
 public class ClientSideServerListener implements Runnable{
     private ClackClient client;
-
-    public ClientSideServerListener(ClackClient c){
+    private MessageBuffer buffer;
+    public ClientSideServerListener(ClackClient c, MessageBuffer b){
         client = c;
+        buffer = b;
     }
 
     /**
@@ -20,7 +23,7 @@ public class ClientSideServerListener implements Runnable{
      */
     @Override
     public void run() {
-        while(!client.isCloseConnection()){
+        while(!buffer.isCloseConnection()){
             client.receiveData();
             if(!client.isCloseConnection()) {
                 client.printData();
