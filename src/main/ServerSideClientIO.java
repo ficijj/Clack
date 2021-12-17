@@ -110,6 +110,7 @@ public class ServerSideClientIO implements Runnable{
                 server.remove(this);
                 System.out.println("Connection closing...");
             } else if(dataToReceiveFromClient.getType() == ClackData.CONST_LIST_USERS) {
+                System.out.println("listing users...");
                 String users = "";
                 String userWhoRequested = dataToReceiveFromClient.getUsername();
                 for(String e : server.usernames){

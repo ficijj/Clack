@@ -1,11 +1,7 @@
 package data;
 
 public class MessageClackData extends ClackData {
-
-    //variables
     private String message;
-
-    //constructors
 
     /**
      * Constructor that sets all variables to user defined values

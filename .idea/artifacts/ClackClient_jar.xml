@@ -1,11 +1,12 @@
 <component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="ClackClient:jar">
+  <artifact type="jar" name="ClackClient:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/ClackClient_jar</output-path>
-    <root id="archive" name="ClackClient.jar">
+    <root id="archive" name="untitled104.jar">
       <element id="directory" name="META-INF">
         <element id="file-copy" path="$PROJECT_DIR$/src/main/ClackClientMeta/META-INF/MANIFEST.MF" />
       </element>
       <element id="module-output" name="untitled104" />
+      <element id="dir-copy" path="$PROJECT_DIR$/../../../../Downloads/openjfx-17.0.1_windows-x64_bin-sdk" />
     </root>
   </artifact>
 </component>

@@ -56,7 +56,6 @@ public class MessageBuffer {
     }
 
     public ObservableList<String> getUsersOList() {
-        System.out.println("user list requested");
         return usersOList;
     }
 

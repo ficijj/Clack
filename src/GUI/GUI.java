@@ -14,6 +14,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.FlowPane;
@@ -82,7 +83,7 @@ public class GUI extends Application {
         buffer.getUsersOList().addListener(new ListChangeListener<String>() {
             @Override
             public void onChanged(Change<? extends String> c) {
-                userList.setText(c.getList().toString());
+                userList.appendText(c.getList().get(c.getList().size() - 1) + "\n");
             }
         });
 
@@ -112,9 +113,34 @@ public class GUI extends Application {
         };
         tfInput.setOnKeyPressed(keyHandler);
 
+        EventHandler<KeyEvent> enterHandler = new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode().equals(KeyCode.ENTER)) {
+
+                }
+            }
+        };
+
+        VBox imageVBox = new VBox();
+        imageVBox.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
+
+        ImageView imageView = new ImageView();
+        imageView.setPreserveRatio(true);
+
+        TextField urlInput = new TextField("type image url here");
+
+        imageVBox.getChildren().add(imageView);
+
+        EventHandler<ActionEvent> mmButtonHandler = new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                primaryStage.setScene(new Scene(imageVBox, 600, 400));
+            }
+        };
+        mmButton.setOnAction(mmButtonHandler);
+
         root.setAlignment(Pos.BOTTOM_CENTER);
-//        tfOutput.setAlignment(Pos.BOTTOM_LEFT);
-//        userList.setAlignment(Pos.TOP_LEFT);
 
         tfOutput.setMinSize(400, 300);
         tfOutput.setMaxSize(5000, 5000);

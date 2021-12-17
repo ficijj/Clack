@@ -143,31 +143,6 @@ public class ClackClient implements Runnable {
     }
 
     /**
-     * Reads the data from stdin and takes the corresponding actions
-     */
-    public void readClientData() {
-//        System.out.println("Reading client data...");
-        String input = inFromStd.nextLine();
-        if (input.equals("DONE")) {
-            closeConnection = true;
-            dataToSendToServer = null;
-        } else if (input.length() > 7 && input.startsWith("SENDFILE")) {
-            dataToSendToServer = new FileClackData(username, input.substring(9), ClackData.CONST_SEND_FILE);
-            try {
-                ((FileClackData) dataToSendToServer).readFileContents();
-            } catch (IOException e) {
-                dataToSendToServer = null;
-                System.err.println("File not able to be read. ");
-            }
-        } else if (input.length() > 8 && input.startsWith("LISTUSERS")) {
-            dataToSendToServer = new MessageClackData(username, null, ClackData.CONST_LIST_USERS);
-        } else {
-            dataToSendToServer = new MessageClackData(username, input, ClackData.CONST_SEND_MESSAGE);
-//            System.out.println("Data to be sent: " + dataToSendToServer);
-        }
-    }
-
-    /**
      * Sends the data read in from stdin to the server
      */
     public void sendData() {
@@ -186,13 +161,14 @@ public class ClackClient implements Runnable {
      */
     public void receiveData() {
         try {
-//            System.out.println("Receiving data...");
+            System.out.println("Receiving data...");
             dataToReceiveFromServer = (ClackData) inFromServer.readObject();
-            if(dataToReceiveFromServer.getUsername() == "server"){
+            System.out.println("username: " + dataToReceiveFromServer.getUsername());
+            if(dataToReceiveFromServer.getUsername().equals("server")){
                 System.out.println("getting user list...");
-                buffer.getUsersOList().add(dataToReceiveFromServer.getData());
+                buffer.getUsersOList().add((String) dataToReceiveFromServer.getData());
             } else {
-
+                System.out.println("getting message...");
                 buffer.getMessageOList().add(dataToReceiveFromServer.getUsername() + ": " + dataToReceiveFromServer.getData() + '\n');
             }
 //            System.out.println("Received data: " + dataToReceiveFromServer);
@@ -206,8 +182,6 @@ public class ClackClient implements Runnable {
      */
     public void printData() {
         System.out.println(dataToReceiveFromServer.getUsername() + ": " + dataToReceiveFromServer.getData());
-//        buffer.makeIncomingMessage(new MessageClackData(dataToReceiveFromServer.getUsername(), dataToReceiveFromServer.getData(), ClackData.CONST_SEND_MESSAGE));
-//        tfOutput.setText(tfOutput.getText() + buffer.readIncomingMessage().getUsername() + ": \n" + buffer.readIncomingMessage().getData() + "\n");
     }
 
     /**
@@ -294,63 +268,6 @@ public class ClackClient implements Runnable {
                 ", dataToSendToServer=" + dataToSendToServer +
                 ", dataToReceiveFromServer=" + dataToReceiveFromServer +
                 '}';
-    }
-
-    public static void main(String[] args) {
-        int port = 0;
-        String user = null;
-        String host = null;
-        String cmdArgs = "";
-        ClackClient c = null;
-
-        int path = 0;
-        if (args.length != 0) {
-            path = determineCase(args[0]);
-        }
-
-        switch (path) {
-            case 0: //no args
-                c = new ClackClient(c.buffer);
-                break;
-            case 1: //just username
-                cmdArgs = args[0];
-                c = new ClackClient(cmdArgs, c.buffer);
-                break;
-            case 2: //user and host name
-                cmdArgs = args[0];
-                user = cmdArgs.substring(0, cmdArgs.indexOf('@'));
-//                System.out.println("username: " + user);
-                host = cmdArgs.substring(cmdArgs.indexOf('@') + 1);
-//                System.out.println("host name: " + host);
-                c = new ClackClient(user, host, c.buffer);
-                break;
-            case 3: //username, hostname, and port number
-                cmdArgs = args[0];
-                user = cmdArgs.split("@")[0];
-                host = (cmdArgs.split("@")[1]).split(":")[0];
-                port = Integer.parseInt((cmdArgs.split("@")[1]).split(":")[1]);
-                c = new ClackClient(user, host, port, c.buffer);
-                break;
-        }
-//        System.out.println(c);
-    }
-
-    /**
-     * Helper method to determine what command line arguments were entered
-     *
-     * @param args the command line arguments
-     * @return the case
-     */
-    private static int determineCase(String args) {
-        if (!args.contains("@") && !args.contains(":")) {
-            return 1;
-        } else if (args.contains("@") && !args.contains(":")) {
-            return 2;
-        } else if (args.contains("@") && args.contains(":")) {
-            return 3;
-        } else {
-            return 0;
-        }
     }
 
 }

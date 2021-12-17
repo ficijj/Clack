@@ -7,9 +7,9 @@ import java.text.SimpleDateFormat;
 
 public abstract class ClackData implements Serializable {
     public static final int CONST_LIST_USERS = 0;
-    public static final int CONST_LOG_OUT = 1;
-    public static final int CONST_SEND_MESSAGE = 2;
-    public static final int CONST_SEND_FILE = 3;
+    public static final int CONST_SEND_MESSAGE = 1;
+    public static final int CONST_SEND_FILE = 2;
+    public static final int CONST_SEND_PICTURE = 3;
 
     private String username;
     private int type;
@@ -43,8 +43,6 @@ public abstract class ClackData implements Serializable {
         this("Anon", 0);
     }
 
-    //methods
-
     /**
      * Accessor for the type
      *
@@ -68,7 +66,7 @@ public abstract class ClackData implements Serializable {
      *
      * @return The class data
      */
-    public abstract String getData();
+    public abstract Object getData();
 
     /**
      * Gives the data contained in the class as a String after decrypting it
@@ -76,7 +74,7 @@ public abstract class ClackData implements Serializable {
      * @param key The decryption key
      * @return The decrypted data
      */
-    public abstract String getData(String key);
+    public abstract Object getData(String key);
 
     /**
      * Gives the date the class was instantiated
