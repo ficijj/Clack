@@ -6,6 +6,7 @@ import data.MessageClackData;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.math.BigInteger;
 import java.net.Socket;
 
 public class ServerSideClientIO implements Runnable{
@@ -20,6 +21,8 @@ public class ServerSideClientIO implements Runnable{
 
     private ClackServer server;
     private  Socket clientSocket;
+
+    private String desKey;
 
     public ServerSideClientIO(ClackServer s, Socket skt){
         closeConnection = false;
@@ -52,6 +55,7 @@ public class ServerSideClientIO implements Runnable{
             outToClient = new ObjectOutputStream(clientSocket.getOutputStream());
             inFromClient = new ObjectInputStream(clientSocket.getInputStream());
 
+            receiveRSAKeys();
             receiveUsername();
             while(!closeConnection){
                 receiveData();
@@ -60,6 +64,37 @@ public class ServerSideClientIO implements Runnable{
                 }
                 receivedUsername = false;
             }
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
+    }
+
+    public void receiveRSAKeys() {
+        System.out.println("Receiving RSA Keys...");
+        try {
+            String keys = (String) inFromClient.readObject();
+            String[] parts = keys.split("\n");
+            BigInteger n = new BigInteger(parts[0].substring(3));
+            BigInteger e = new BigInteger(parts[1].substring(3));
+
+            String encryptedKey = "";
+            for(char c: desKey.toCharArray()) {
+                BigInteger m = new BigInteger(String.valueOf((int) c));
+                BigInteger ciph = m.modPow(e, n);
+                encryptedKey += ciph + " ";
+            }
+            sendDESKey(encryptedKey);
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public void sendDESKey(String encryptedKey) {
+        System.out.println("Sending DES key...");
+        try {
+            outToClient.writeObject(encryptedKey);
+            outToClient.flush();
+            System.out.println("Data flushed...: ");
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
         }

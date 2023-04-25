@@ -6,7 +6,9 @@ import data.FileClackData;
 import data.MessageClackData;
 
 import java.io.*;
+import java.math.BigInteger;
 import java.net.Socket;
+import java.security.SecureRandom;
 import java.util.Scanner;
 
 public class ClackClient implements Runnable {
@@ -26,6 +28,16 @@ public class ClackClient implements Runnable {
     private ClackData dataToReceiveFromServer;
 
     private ClientSideServerListener listener;
+
+    private static final SecureRandom RAND = new SecureRandom();
+
+    private BigInteger p;
+    private BigInteger q;
+    private BigInteger n;
+    private BigInteger e;
+    private BigInteger d;
+
+    private String desKey;
 
     Socket skt;
     private static int DEFAULT_PORT = 7000;
@@ -105,6 +117,8 @@ public class ClackClient implements Runnable {
             Thread l = new Thread(new ClientSideServerListener(this, buffer));
             l.start();
 
+            sendRSAKeys();
+            receiveDESKey();
             sendUsername();
             while (!buffer.isCloseConnection()) {
                 dataToSendToServer = buffer.readOutgoingMessage();
@@ -118,6 +132,48 @@ public class ClackClient implements Runnable {
             inFromServer.close();
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
+        }
+    }
+
+    public void sendRSAKeys() {
+        generateRSAKeys(4000);
+        System.out.println("Sending RSA keys...");
+        try {
+            String keys = "n: " + n + "\ne: " + e;
+            outToServer.writeObject(keys);
+            outToServer.flush();
+            System.out.println("Data flushed...");
+        } catch (IOException ioe) {
+            System.err.println(ioe.getMessage());
+        }
+    }
+
+    private void generateRSAKeys(int bitLength) {
+        System.out.println("Generating RSA keys...");
+        p = BigInteger.probablePrime(bitLength, RAND);
+        q = BigInteger.probablePrime(bitLength, RAND);
+
+        n = p.multiply(q);
+
+        BigInteger phi = p.subtract(BigInteger.ONE).multiply(q.subtract(BigInteger.ONE));
+        e = BigInteger.probablePrime(bitLength / 2, RAND);
+        while (phi.gcd(e).compareTo(BigInteger.ONE) > 0 && e.compareTo(phi) < 0) {
+            e.add(BigInteger.ONE);
+        }
+        d = e.modInverse(phi);
+    }
+
+    public void receiveDESKey() {
+        System.out.println("Receiving DES key...");
+        try {
+            String temp = (String) inFromServer.readObject();
+            String[] encryptedValues = temp.split(" ");
+            for (String encryptedValue : encryptedValues) {
+                BigInteger decrypted = new BigInteger(encryptedValue).modPow(d, n);
+                desKey += (char) decrypted.intValue();
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println(e.getMessage());
         }
     }
 
