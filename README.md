@@ -1,0 +1,1 @@
+This is a simple encrypted multi-client messaging program. It can be run using the jar files in `out/artifacts/`. Start the server first, then any number of clients can be started from anywhere, as long as they have the correct ip address for the server.
